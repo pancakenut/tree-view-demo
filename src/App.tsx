@@ -114,7 +114,7 @@ function NavigateButton({ mapRef }: { mapRef: React.RefObject<MapRef | null> }) 
     map3?.getMap()?.flyTo({ center: [-74.006, 40.7128], zoom: 11, duration: 800 })
   }
 
-  return <button onClick={onClick} style={{ position: 'absolute', top: 8, left: 8, zIndex: 1 }}>Go</button>
+  return <button onClick={onClick} className="bg-white text-black px-3 py-1 rounded shadow hover:bg-gray-100 cursor-pointer" style={{ position: 'absolute', top: 8, left: 8, zIndex: 1 }}>Go</button>
 }
 
 
