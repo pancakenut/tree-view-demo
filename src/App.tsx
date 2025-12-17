@@ -25,6 +25,7 @@ import type { MapRef } from "react-map-gl/mapbox"
 import MeasureControl from './components/measurement/MeasureControl'
 import Test from './components/measurement/Test'
 import KitchenDemo from './components/test/代码执行顺序'
+import MeasurementTool from './components/measurement/MeasurementTool'
 
 const data: TreeDataItem[] = [
   {
@@ -128,8 +129,8 @@ function App() {
   const map3Ref = useRef<MapRef | null>(null)
 
   return (
-    <div className="p-6">
-      <div>
+    <div className="">
+      {/* <div>
         <h2>验证 atom.val 直接赋值是否生效</h2>
         <ComponentA />
         <ComponentB />
@@ -168,9 +169,9 @@ function App() {
           <ReactMapGl mapId={(layerToggles.linked ?? false) ? 'shared' : 'map1'} style={{ width: 600, height: 400 }} />
           <ReactMapGl mapId={(layerToggles.linked ?? false) ? 'shared' : 'map2'} style={{ width: 600, height: 400 }} />
         </div>
-      </div>
+      </div> */}
 
-      <div className='mt-8'>
+      <div className='w-screen h-screen'>
         <MapProvider>
           <Map
             id='map3'
@@ -181,12 +182,13 @@ function App() {
               latitude: 30.62161425111897,
               zoom: 14
             }}
-            style={{ width: 600, height: 400, position: 'relative' }}
+            style={{ width: '100%', height: '100%', position: 'relative' }}
             mapStyle="mapbox://styles/yqrkmjuw/cmh8x9cc900b901qp2ezog78v"
           >
-            <NavigateButton mapRef={map3Ref} />
-            <MeasureControl mapId="map3" />
-            <Test />
+            {/* <NavigateButton mapRef={map3Ref} /> */}
+            {/* <MeasureControl mapId="map3" /> */}
+            {/* <Test /> */}
+            <MeasurementTool />
           </Map>
 
           <Map id='map2'></Map>

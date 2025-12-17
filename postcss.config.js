@@ -1,6 +1,6 @@
 export default {
   plugins: {
-    '@tailwindcss/postcss': {},
+    // '@tailwindcss/postcss': {}, // Disable to avoid conflict with @tailwindcss/vite
     autoprefixer: {},
   },
 };

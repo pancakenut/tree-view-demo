@@ -1,8 +1,21 @@
 /** @type {import('tailwindcss').Config} */
+
+// 生成 0 - 2000 的像素映射，实现 1:1 px
+const pxMap = Array.from({ length: 2001 }).reduce((acc, _, i) => {
+  acc[i] = `${i}px`;
+  return acc;
+}, {});
+
 export default {
   content: ["./index.html", "./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
+      // 扩展 spacing, fontSize, lineHeight, borderWidth 以支持数字直接对应 px
+      spacing: pxMap,
+      fontSize: pxMap,
+      lineHeight: pxMap,
+      borderWidth: pxMap,
+      
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
