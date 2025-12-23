@@ -19,7 +19,8 @@
     /* Path alias for local types package */
     "baseUrl": ".",
     "paths": {
-      "@sonic/types": ["src/types"]
+      "@sonic/types": ["src/types"],
+      "@/*": ["src/*"]
     },
 
     /* Linting */
@@ -30,5 +31,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src"]
+  "include": ["src", "src/auto-imports.d.ts"]
 }

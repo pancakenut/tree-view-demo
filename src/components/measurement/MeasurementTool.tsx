@@ -1,8 +1,10 @@
+import { useEffect } from "react";
+import { useSnapshot } from "valtio";
 import { Layer, Marker, useMap, Source } from "react-map-gl/mapbox";
 import type { LayerProps } from "react-map-gl/mapbox";
-import type { FeatureCollection, LineString, MultiPoint, Point, Position } from "geojson";
-import { useEffect, useState } from "react";
+import type { FeatureCollection, LineString, Position } from "geojson";
 import type { MapMouseEvent } from "mapbox-gl";
+import { measurementStore, measurementActions } from '@/store/measurementStore'
 
 const geojson: FeatureCollection<LineString> = {
   "type": "FeatureCollection",
@@ -40,54 +42,28 @@ const lineLayer: LayerProps = {
   }
 };
 
-type LngLat = {
-  lng: number,
-  lat: number
-}
-
 function MeasurementTool() {
+  const snap = useSnapshot(measurementStore)
+
   const { current: map } = useMap()
-
-  const [markerArr, setMarkerArr] = useState<Position[]>([])
-  const [oldMarkerArr, setOldMarkerArr] = useState<Position[]>([])
-
-  const [markerData, setMarkerData] = useState<FeatureCollection<LineString>>({
-    type: 'FeatureCollection',
-    features: []
-  })
-  const [oldMrkerData, setOldMarkerData] = useState<FeatureCollection<LineString>>({
-    type: 'FeatureCollection',
-    features: []
-  })
-
-  const [previewLine, setPreviewLine] = useState<Position[]>([])
 
   useEffect(() => {
     if (!map) return
 
     const onClick = (e: MapMouseEvent) => {
-      console.log("e", e.lngLat)
       const { lng, lat } = e.lngLat
-      setMarkerArr(prev => [...prev, [lng, lat]])
-      setPreviewLine([[lng, lat], [lng, lat]])
+      // setMarkerArr(prev => [...prev, [lng, lat]])
+      measurementActions.addPoint(lng, lat)
     }
 
     const onMouseMove = (e: MapMouseEvent) => {
       const { lng: lng_end, lat: lat_end } = e.lngLat
-      setPreviewLine(prev => {
-        const start = prev[0];
-        if (!start) return prev;
-        return [start, [lng_end, lat_end]]
-      })
+      measurementActions.setPreviewLineEnd(lng_end, lat_end)
     }
 
     const onDblClick = (e: MapMouseEvent) => {
-      setOldMarkerArr(prev => [...prev, ...markerArr])
-      setMarkerArr([])
-      setMarkerData({
-        type: 'FeatureCollection',
-        features: []
-      })
+      e.preventDefault();
+      measurementActions.finishDrawing()
     }
 
     map.on('click', onClick)
@@ -97,6 +73,7 @@ function MeasurementTool() {
     return () => {
       map.off('click', onClick)
       map.off('mousemove', onMouseMove)
+      map.off('dblclick', onDblClick)
     }
   }, [map])
 
@@ -107,39 +84,45 @@ function MeasurementTool() {
         type: 'Feature',
         geometry: {
           type: 'LineString',
-          coordinates: previewLine
+          coordinates: snap.previewLine as Position[]
         },
         properties: {}
       }
     ]
   }
 
-  useEffect(() => {
-    setMarkerData({
-      type: 'FeatureCollection',
-      features: [{
-        type: 'Feature',
-        geometry: { type: 'LineString', coordinates: markerArr },
-        properties: {}
-      }]
-    })
-  }, [markerArr])
+  // 确保彻底去除 Proxy 包装，获取纯净数组
+  // 这是为了解决 Mapbox 可能无法识别 Proxy 对象或无法检测其变化的问题
+  const cleanMarkerArr = JSON.parse(JSON.stringify(snap.markerArr));
 
-  useEffect(() => {
-    setOldMarkerData({
-      type: 'FeatureCollection',
-      features: [{
+  const currentLineGeoJSON: FeatureCollection<LineString> = {
+    type: 'FeatureCollection',
+    features: cleanMarkerArr.length >= 2 ? [
+      {
         type: 'Feature',
-        geometry: { type: 'LineString', coordinates: oldMarkerArr },
+        geometry: {
+          type: 'LineString',
+          coordinates: cleanMarkerArr
+        },
         properties: {}
-      }]
-    })
-  }, [oldMarkerArr])
+      },
+    ] : []
+  }
+
+  // 从 oldMarkerData 中提取所有坐标点
+  const allOldPoints = snap.oldMarkerData.features.flatMap(feature => {
+    if (feature.geometry.type === 'LineString') {
+      return feature.geometry.coordinates;
+    }
+
+    return [];
+  })
 
   return (
     <>
+      {/* 已画线段的端点 */}
       {
-        markerArr.map((coord, idx) => (
+        allOldPoints.map((coord, idx) => (
           <Marker
             key={`marker-${idx}`}
             longitude={coord[0]}
@@ -151,10 +134,35 @@ function MeasurementTool() {
         ))
       }
 
-      <Source id="line-source" type="geojson" data={markerData}>
-        <Layer {...lineLayer} />
+      {/* 正在画的线段端点 */}
+      {
+        snap.markerArr.map((coord, idx) => (
+          <Marker
+            key={`marker-${idx}`}
+            longitude={coord[0]}
+            latitude={coord[1]}
+            anchor="center"
+          >
+            <div className="size-4 rounded-full bg-red-500 border border-white shadow-sm" />
+          </Marker>
+        ))
+      }
+
+      {/* 已画线段 */}
+      <Source id="old-line-source" type="geojson" data={snap.oldMarkerData as FeatureCollection}>
+        <Layer {...lineLayer} id="old-line-layer" />
       </Source>
 
+      {/* 正在画的线段 */}
+      <Source
+        id="current-line-source"
+        type="geojson"
+        data={currentLineGeoJSON}
+      >
+        <Layer {...lineLayer} id="current-line-layer" />
+      </Source>
+
+      {/* 预览线 */}
       <Source id="preview-source" type="geojson" data={previewGeoJSON}>
         <Layer
           id="preview-line"

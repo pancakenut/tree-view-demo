@@ -26,6 +26,10 @@ import MeasureControl from './components/measurement/MeasureControl'
 import Test from './components/measurement/Test'
 import KitchenDemo from './components/test/代码执行顺序'
 import MeasurementTool from './components/measurement/MeasurementTool'
+import { LayerManager } from './components/layers/LayerManager'
+import { ControlBtn } from './components/sidebar/controlbtn'
+
+import { layers } from '@/config/layerConfig'
 
 const data: TreeDataItem[] = [
   {
@@ -188,6 +192,7 @@ function App() {
             {/* <NavigateButton mapRef={map3Ref} /> */}
             {/* <MeasureControl mapId="map3" /> */}
             {/* <Test /> */}
+            <LayerManager />
             <MeasurementTool />
           </Map>
 
@@ -195,10 +200,15 @@ function App() {
         </MapProvider>
       </div>
 
-      <div>
-      </div>
-    </div >
+      <div className='absolute right-40 bottom-50 gap-1.5 grid-cols-1 grid'>
+        {
+          layers.map((layer) =>
+            <ControlBtn layerid={layer.id} />
+          )
+        }
+      </div>    </div >
   )
 }
 
 export default App
+
