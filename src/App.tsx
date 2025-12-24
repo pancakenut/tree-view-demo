@@ -10,7 +10,8 @@ import {
   MapPin,
   Building,
   Home,
-  Settings
+  Settings,
+  Bot
 } from 'lucide-react'
 import MapboxView from './components/MapboxView'
 import { useState, useRef, useEffect } from 'react'
@@ -28,6 +29,7 @@ import KitchenDemo from './components/test/代码执行顺序'
 import MeasurementTool from './components/measurement/MeasurementTool'
 import { LayerManager } from './components/layers/LayerManager'
 import { ControlBtn } from './components/sidebar/controlbtn'
+// import AIModule from './ai-module/AIModule'
 
 import { layers } from '@/config/layerConfig'
 
@@ -122,8 +124,10 @@ function NavigateButton({ mapRef }: { mapRef: React.RefObject<MapRef | null> }) 
   return <button onClick={onClick} className="bg-white text-black px-3 py-1 rounded shadow hover:bg-gray-100 cursor-pointer" style={{ position: 'absolute', top: 8, left: 8, zIndex: 1 }}>Go</button>
 }
 
+import { useNavigate } from 'react-router-dom'
 
 function App() {
+  const navigate = useNavigate();
   // const [selectedItemId, setSelectedItemId] = useState<string | undefined>(undefined)
 
   const [layerToggles, setLayerToggles] = useState<Record<string, boolean>>({
@@ -134,6 +138,7 @@ function App() {
 
   return (
     <div className="">
+
       {/* <div>
         <h2>验证 atom.val 直接赋值是否生效</h2>
         <ComponentA />
@@ -188,6 +193,7 @@ function App() {
             }}
             style={{ width: '100%', height: '100%', position: 'relative' }}
             mapStyle="mapbox://styles/yqrkmjuw/cmh8x9cc900b901qp2ezog78v"
+            reuseMaps
           >
             {/* <NavigateButton mapRef={map3Ref} /> */}
             {/* <MeasureControl mapId="map3" /> */}
@@ -196,17 +202,26 @@ function App() {
             <MeasurementTool />
           </Map>
 
-          <Map id='map2'></Map>
+          {/* <Map id='map2'></Map> */}
         </MapProvider>
       </div>
 
-      <div className='absolute right-40 bottom-50 gap-1.5 grid-cols-1 grid'>
+      <div className='absolute right-40 bottom-20 gap-1.5 grid-cols-1 grid'>
         {
           layers.map((layer) =>
-            <ControlBtn layerid={layer.id} />
+            <ControlBtn key={layer.id} layerid={layer.id} />
           )
         }
-      </div>    </div >
+      </div>
+
+      <button
+        className="absolute bottom-24 left-24 z-40 bg-linear-to-r from-blue-600 to-indigo-600 text-white px-20 py-12 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all flex items-center gap-8"
+        onClick={() => navigate('/ai-assistant')}
+      >
+        <Bot className="w-24 h-24" />
+        <span className="font-bold">AI 知识库助手</span>
+      </button>
+    </div >
   )
 }
 

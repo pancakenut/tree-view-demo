@@ -109,10 +109,16 @@ function MeasurementTool() {
     ] : []
   }
 
-  // 从 oldMarkerData 中提取所有坐标点
-  const allOldPoints = snap.oldMarkerData.features.flatMap(feature => {
+  // 从 oldMarkerData 中提取所有坐标点和对应的标签
+  const allOldMarkers = snap.oldMarkerData.features.flatMap(feature => {
     if (feature.geometry.type === 'LineString') {
-      return feature.geometry.coordinates;
+      const coords = feature.geometry.coordinates;
+      const labels = feature.properties?.distanceLabels as string[] || [];
+      
+      return coords.map((coord, idx) => ({
+        coord,
+        label: labels[idx] || ''
+      }));
     }
 
     return [];
@@ -122,14 +128,23 @@ function MeasurementTool() {
     <>
       {/* 已画线段的端点 */}
       {
-        allOldPoints.map((coord, idx) => (
+        allOldMarkers.map((item, idx) => (
           <Marker
-            key={`marker-${idx}`}
-            longitude={coord[0]}
-            latitude={coord[1]}
+            key={`old-marker-${idx}`}
+            longitude={item.coord[0]}
+            latitude={item.coord[1]}
             anchor="center"
           >
-            <div className="size-4 rounded-full bg-red-500 border border-white shadow-sm" />
+            <div className="relative">
+              {item.label && (
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-0.5 bg-white rounded shadow text-xs font-medium text-slate-700 whitespace-nowrap pointer-events-none z-10">
+                  {item.label}
+                  {/* 小三角箭头 */}
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-px border-4 border-transparent border-t-white" />
+                </div>
+              )}
+              <div className="size-3 rounded-full bg-red-500 border-2 border-white shadow-sm" />
+            </div>
           </Marker>
         ))
       }
@@ -138,12 +153,21 @@ function MeasurementTool() {
       {
         snap.markerArr.map((coord, idx) => (
           <Marker
-            key={`marker-${idx}`}
+            key={`current-marker-${idx}`}
             longitude={coord[0]}
             latitude={coord[1]}
             anchor="center"
           >
-            <div className="size-4 rounded-full bg-red-500 border border-white shadow-sm" />
+             <div className="relative">
+              {snap.distanceLabels[idx] && (
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-0.5 bg-white rounded shadow text-xs font-medium text-slate-700 whitespace-nowrap pointer-events-none z-10">
+                  {snap.distanceLabels[idx]}
+                  {/* 小三角箭头 */}
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-px border-4 border-transparent border-t-white" />
+                </div>
+              )}
+              <div className="size-3 rounded-full bg-red-500 border-2 border-white shadow-sm" />
+            </div>
           </Marker>
         ))
       }
