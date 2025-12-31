@@ -12,6 +12,7 @@ export default defineConfig({
     AutoImport({
       imports: [
         'react',
+        "react-router-dom",
         {
           'valtio': ['useSnapshot', 'proxy', 'snapshot', 'subscribe']
         }

@@ -185,7 +185,7 @@ export function ChatInterface() {
                     >
                         <Send className="w-16 h-16 mr-8" />
                         发送
-                    </button>
+                    </button>   
                 </form>
             </div>
         </div>
