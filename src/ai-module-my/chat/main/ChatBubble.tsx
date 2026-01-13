@@ -2,25 +2,20 @@ import React from 'react';
 import { Bubble } from '@ant-design/x';
 import ReactMarkdown from 'react-markdown';
 import { RiUser3Line, RiRobot2Line, RiFileTextLine } from '@remixicon/react';
+import { type Citation } from './hooks/useDifyChat';
 
 interface ChatBubbleProps {
     message: {
         role: string;
         content: string;
+        citations?: Citation[];
     };
     isFirst?: boolean;
 }
 
-const references = [
-    {
-        id: 'doc-1',
-        title: '武办文34号 两办发 关于印发武汉市实施“五改四好”加快推进高质量城市更新行动方案的通知.pdf',
-        type: 'pdf'
-    }
-];
-
 export const ChatBubble: React.FC<ChatBubbleProps> = ({ message, isFirst }) => {
     const isUser = message.role === 'user';
+    const citations = message.citations || [];
 
     // 解析 <think> 标签
     const parseContent = (content: string) => {
@@ -66,17 +61,17 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({ message, isFirst }) => {
                 </ReactMarkdown>
             </div>
 
-            {/* 引用文件列表 - 仅在非用户且是第一条消息时显示 (根据需求调整) */}
-            {!isUser && isFirst && (
+            {/* 引用文件列表 - 仅在非用户且有引用时显示 */}
+            {!isUser && citations.length > 0 && (
                 <div className="mt-2 flex flex-col gap-2">
-                    {references.map(ref => (
+                    {citations.map((ref, index) => (
                         <div
-                            key={ref.id}
-                            className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors border border-blue-100"
-                            onClick={() => console.log('Preview:', ref.title)}
+                            key={index}
+                            className="flex items-center gap-2 p-8 bg-blue-50 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors border border-blue-100"
+                            onClick={() => console.log('预览:', ref.document_name)}
                         >
-                            <RiFileTextLine className="w-5 h-5 text-blue-500 shrink-0" />
-                            <span className="text-xs text-blue-700 truncate font-medium">{ref.title}</span>
+                            <RiFileTextLine className="size-16 text-blue-500 shrink-0" />
+                            <span className="text-xs text-blue-700 truncate font-medium">{ref.document_name}</span>
                         </div>
                     ))}
                 </div>
@@ -86,12 +81,12 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({ message, isFirst }) => {
 
     // 渲染头像
     const avatar = isUser ? (
-        <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center">
-            <RiUser3Line className="w-5 h-5 text-slate-500" />
+        <div className="size-24 rounded-full bg-slate-200 flex items-center justify-center">
+            <RiUser3Line className="size-20 text-slate-500" />
         </div>
     ) : (
-        <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center shadow-md">
-            <RiRobot2Line className="w-5 h-5 text-white" />
+        <div className="size-24 rounded-full bg-indigo-600 flex items-center justify-center shadow-md">
+            <RiRobot2Line className="size-20 text-white" />
         </div>
     );
 
@@ -101,7 +96,11 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({ message, isFirst }) => {
             <span className="font-semibold text-sm text-slate-800">法规知识专家</span>
             <span className="text-xs text-slate-400">{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
         </div>
-    ) : null;
+    ) : (
+        <div className="flex items-center gap-2 mb-1">
+            <span className="text-xs text-slate-400">{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+        </div>
+    );
 
     return (
         <div className={`flex w-full mb-6 ${isUser ? 'justify-end' : 'justify-start'}`}>
@@ -116,9 +115,9 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({ message, isFirst }) => {
                 styles={{
                     content: {
                         borderRadius: isUser ? '12px 0 12px 12px' : '0 12px 12px 12px', // 自定义圆角：AI左上直角，User右上直角
-                        backgroundColor: isUser ? '#e0e7ff' : '#ffffff', // User: indigo-100, AI: white
+                        backgroundColor: isUser ? '#F4F6FC' : '#ffffff', // User: indigo-100, AI: white
                         boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-                        border: '1px solid rgba(0,0,0,0.05)',
+                        border: '2px solid rgba(255,255,255,0.8)',
                         padding: '16px'
                     }
                 }}

@@ -1,0 +1,14 @@
+.sender-focused {
+    border-color: #3b82f6 !important;
+    border-width: 2px !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3) !important;
+    outline: none !important;
+}
+
+/* 增强覆盖：防止 Ant Design 内部组件的默认样式干扰 */
+.sender-focused .ant-input,
+.sender-focused textarea {
+    border-color: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+}

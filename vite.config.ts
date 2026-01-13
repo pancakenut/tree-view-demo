@@ -28,4 +28,13 @@ export default defineConfig({
   define: {
     'process.env': {},
   },
+  server: {
+    proxy: {
+      '/dify-api': {
+        target: 'http://172.18.83.142:8080',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/dify-api/, '/v1'),
+      },
+    },
+  },
 })
